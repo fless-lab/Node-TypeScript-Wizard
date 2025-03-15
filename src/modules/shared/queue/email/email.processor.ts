@@ -1,11 +1,11 @@
-import { IEmailJob, IEmailJobResult } from './types';
 import { MailServiceUtilities } from 'modules/shared/notificator';
 import path from 'path';
+import { IEmailJob, IEmailJobResult } from './types';
 
 export class EmailJobProcessor {
   async process(job: IEmailJob): Promise<IEmailJobResult> {
     const startTime = Date.now();
-    const { to, template, data, metadata } = job.data;
+    const { to, template, data, metadata } = job.data as any;
 
     try {
       LOGGER.info(`Processing email job ${job.id}`, {

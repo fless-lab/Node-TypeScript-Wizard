@@ -6,9 +6,9 @@ import {
 import { AuthenticationStrategies } from 'modules/authz/authentication/strategies';
 import { OTPService, UserService } from 'modules/features/actions';
 import { IOTPModel } from 'modules/features/actions/otp/types';
+import { IUserModel } from 'modules/features/actions/user/types';
 import EmailQueueService from 'modules/shared/queue/email/email.queue.service';
 import { EmailTemplate } from 'modules/shared/queue/email/types';
-import { IUserModel } from 'modules/features/actions/user/types';
 
 class AuthService {
   async register(payload: any) {
@@ -178,13 +178,36 @@ class AuthService {
         });
       }
 
-      const otpResponse = await OTPService.generate(
+      const otpResponse = (await OTPService.generate(
         email,
         CONFIG.otp.purposes.LOGIN_CONFIRMATION.code,
-      );
+      )) as any;
 
       if (!otpResponse.success) {
         throw otpResponse.error;
+      }
+
+      const mailData = {
+        name: `${user.firstname} ${user.lastname}`,
+        email: email,
+        code: otpResponse.data?.code,
+      };
+
+      const mailResponse = await EmailQueueService.addToQueue({
+        to: email,
+        template: EmailTemplate.OTP,
+        data: mailData,
+      });
+
+      if (!mailResponse.success) {
+        LOGGER.error('Failed to queue verification email', mailResponse.error);
+        throw new ErrorResponse({
+          code: 'EMAIL_QUEUE_ERROR',
+          message:
+            'Failed to queue generate login otp. Please try again later.',
+          statusCode: 500,
+          originalError: mailResponse.error,
+        });
       }
 
       return { success: true, data: otpResponse };
@@ -487,6 +510,31 @@ class AuthService {
 
       if (!otpResponse.success) {
         throw otpResponse.error;
+      }
+
+      const otp = otpResponse.data;
+
+      const mailData = {
+        name: `${user.firstname} ${user.lastname}`,
+        email: email,
+        code: otp?.code,
+      };
+
+      const mailResponse = await EmailQueueService.addToQueue({
+        to: email,
+        template: EmailTemplate.OTP,
+        data: mailData,
+      });
+
+      if (!mailResponse.success) {
+        LOGGER.error('Failed to queue verification email', mailResponse.error);
+        throw new ErrorResponse({
+          code: 'EMAIL_QUEUE_ERROR',
+          message:
+            'Failed to queue verification email. Please try again later.',
+          statusCode: 500,
+          originalError: mailResponse.error,
+        });
       }
 
       return { success: true };

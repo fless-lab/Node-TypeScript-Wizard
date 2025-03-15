@@ -1,8 +1,8 @@
 // TODO - Format error responses
 
-import JWT, { SignOptions } from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ErrorResponse } from '@nodesandbox/response-kit';
+import { NextFunction, Request, Response } from 'express';
+import JWT, { SignOptions } from 'jsonwebtoken';
 
 class JwtStrategy {
   private static instance: JwtStrategy;
@@ -35,7 +35,7 @@ class JwtStrategy {
     return new Promise((resolve, reject) => {
       const payload = {};
       const options: SignOptions = {
-        expiresIn: this.accessTokenExpireTime,
+        expiresIn: this.accessTokenExpireTime as any,
         issuer: this.tokenIssuer,
         audience: userId,
       };
@@ -138,7 +138,7 @@ class JwtStrategy {
     return new Promise((resolve, reject) => {
       const payload = {};
       const options: SignOptions = {
-        expiresIn: this.refreshTokenExpireTime,
+        expiresIn: this.refreshTokenExpireTime as any,
         issuer: this.tokenIssuer,
         audience: userId,
       };
