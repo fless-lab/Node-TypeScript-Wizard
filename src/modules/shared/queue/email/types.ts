@@ -1,4 +1,4 @@
-import { Job, JobOptions, JobId, JobStatus } from 'bull';
+import { Job, JobId, JobOptions, JobStatus } from 'bull';
 
 export interface IEmailJobData {
   to: string;
@@ -39,6 +39,7 @@ export enum EmailTemplate {
   ACCOUNT_CREATION = 'account-creation',
   PASSWORD_RESET = 'password-reset',
   EMAIL_VERIFICATION = 'email-verification',
+  OTP = 'otp',
   WELCOME = 'welcome',
 }
 
