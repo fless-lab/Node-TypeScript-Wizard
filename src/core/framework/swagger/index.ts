@@ -134,7 +134,7 @@ export function generateOpenApiSpec(options: swaggerJsdoc.Options): OpenAPIV3.Do
   
   // Fusionner les chemins collectés par les décorateurs
   Object.entries(apiDocs.paths).forEach(([path, methods]) => {
-    if (!mergedOptions.definition?.paths) {
+    if (!mergedOptions.definition.paths) {
       mergedOptions.definition.paths = {};
     }
     
