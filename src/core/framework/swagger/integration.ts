@@ -71,8 +71,14 @@ export class SwaggerIntegration {
   /**
    * Initialise Swagger pour toutes les applications du projet
    * @param app L'application Express principale
+   * @param options Options globales pour l'extraction des types
    */
-  static initializeForAllApps(app: Application = APP) {
+  static initializeForAllApps(app: Application = APP, options = {
+    autoExtractTypes: true,
+    typeExtractorOptions: {
+      ignoreFiles: ['node_modules', 'dist', 'test']
+    }
+  }) {
     // Récupérer toutes les routes enregistrées
     const routes = listRoutes(app);
     
@@ -98,6 +104,8 @@ export class SwaggerIntegration {
           version: '1.0.0',
           description: `Documentation de l'API ${appName}`,
           basePath: `/api/v1/${appName}`,
+          autoExtractTypes: options.autoExtractTypes,
+          typeExtractorOptions: options.typeExtractorOptions
         });
       }
     });
@@ -109,6 +117,8 @@ export class SwaggerIntegration {
       version: '1.0.0',
       description: 'Documentation complète de l\'API',
       basePath: '/api/v1',
+      autoExtractTypes: options.autoExtractTypes,
+      typeExtractorOptions: options.typeExtractorOptions
     });
   }
 }
