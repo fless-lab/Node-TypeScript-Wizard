@@ -21,25 +21,26 @@ async function startServer() {
     await initServices();
     global.APP = WebServer.app;
     
-    // Initialiser Swagger pour toutes les applications avec extraction automatique des types
-    SwaggerIntegration.initializeForAllApps();
-    
-    // Initialiser une documentation API globale avec extraction automatique des types
-    SwaggerIntegration.initialize(APP, {
-      apiPath: '/api-docs',
-      title: 'API Documentation Complète',
+    // Configuration unique de Swagger
+    const swaggerConfig = {
+      apiPath: '/docs',
+      title: 'API Documentation',
       version: '1.0.0',
-      description: 'Documentation complète de l\'API avec schémas extraits automatiquement',
+      description: 'Documentation API générée automatiquement',
       basePath: '/api/v1',
       autoExtractTypes: true,
       typeExtractorOptions: {
-        ignoreFiles: ['node_modules', 'dist', 'test']
+        baseDir: 'src',
+        ignoreFiles: ['node_modules', 'dist', 'test', '*.test.ts', '*.spec.ts']
       }
-    });
+    };
+
+    // Initialiser Swagger
+    SwaggerIntegration.initialize(APP, swaggerConfig);
     
     APP.listen(CONFIG.port, () => {
       LOGGER.info(`Server running on port ${CONFIG.port}`);
-      LOGGER.info(`Documentation API disponible à /docs`);
+      LOGGER.info(`Documentation API disponible à ${swaggerConfig.apiPath}`);
     });
   } catch (error) {
     LOGGER.error('Failed to initialize services', error as any);
