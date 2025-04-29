@@ -127,6 +127,18 @@ class AuthService {
         throw verifyUserResponse.error;
       }
 
+      // Envoi du mail de bienvenue après vérification
+      const user = userResponse.data.docs;
+      const mailData = {
+        name: `${user.firstname} ${user.lastname}`,
+        email: user.email,
+      };
+      await EmailQueueService.addToQueue({
+        to: user.email,
+        template: EmailTemplate.WELCOME,
+        data: mailData,
+      });
+
       return { success: true };
     } catch (error) {
       return {
