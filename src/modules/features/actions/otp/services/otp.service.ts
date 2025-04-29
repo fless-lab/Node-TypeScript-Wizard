@@ -21,6 +21,7 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
   async generate(
     email: string,
     purpose: TOTPPurpose,
+    sendEmail = true,
   ): Promise<SuccessResponseType<IOTPModel> | ErrorResponseType> {
     try {
       const userResponse = await UserService.findOne({ email });
@@ -39,14 +40,16 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
         purpose,
       });
 
-      const mailResponse = await MailServiceUtilities.sendOtp({
-        to: user.email,
-        code: otp.code,
-        purpose,
-      });
+      if (sendEmail) {
+        const mailResponse = await MailServiceUtilities.sendOtp({
+          to: user.email,
+          code: otp.code,
+          purpose,
+        });
 
-      if (!mailResponse.success) {
-        throw mailResponse.error;
+        if (!mailResponse.success) {
+          throw mailResponse.error;
+        }
       }
 
       return { success: true, data: otp };
