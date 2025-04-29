@@ -1,6 +1,7 @@
-import { Application, Router } from 'express';
+import { Application } from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { ObjectSchema } from 'joi';
-import { createSwaggerMiddleware, registerJoiSchemas, registerSchema } from '.';
+import { createSwaggerMiddleware, registerJoiSchemas, registerSchema, generateOpenApiSpec } from '.';
 import { listRoutes } from 'helpers/routing';
 import { extractOpenApiSchemas } from './type-extractor';
 
@@ -45,9 +46,10 @@ export class SwaggerIntegration {
       }
     }
 
-    // Créer le middleware Swagger
-    const swaggerRouter = createSwaggerMiddleware({
+    // Générer la spécification OpenAPI
+    const swaggerSpec = generateOpenApiSpec({
       definition: {
+        openapi: '3.0.0',
         info: {
           title: options.title,
           version: options.version,
@@ -59,11 +61,40 @@ export class SwaggerIntegration {
             description: 'API Server',
           },
         ],
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }],
       },
+      apis: ['./src/**/*.ts'], // Spécifier les fichiers à analyser
     });
 
-    // Monter le middleware Swagger sur le chemin spécifié
-    app.use(options.apiPath, swaggerRouter);
+    // Configuration de Swagger UI
+    const swaggerUiOptions = {
+      explorer: true,
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    };
+
+    // Monter Swagger UI et la spécification
+    app.use(
+      options.apiPath,
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, swaggerUiOptions)
+    );
+
+    // Endpoint pour la spécification brute
+    app.get(`${options.apiPath}/swagger.json`, (req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(swaggerSpec);
+    });
 
     LOGGER.info(`Documentation Swagger disponible à ${options.apiPath}`);
   }

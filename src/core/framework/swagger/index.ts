@@ -149,11 +149,29 @@ export function createSwaggerMiddleware(options: swaggerJsdoc.Options = {}): Rou
   const router = Router();
   const spec = generateOpenApiSpec(options);
   
-  router.use('/', swaggerUi.serve);
-  router.get('/', swaggerUi.setup(spec, {
+  // Configurer Swagger UI
+  const swaggerUiOptions = {
     explorer: true,
     customCss: '.swagger-ui .topbar { display: none }',
-  }));
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: 'list',
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+    }
+  };
+
+  // Monter Swagger UI
+  router.use(swaggerUi.serve);
+  router.get('/', swaggerUi.setup(spec, swaggerUiOptions));
+  
+  // Ajouter un endpoint pour la spécification OpenAPI
+  router.get('/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(spec);
+  });
   
   return router;
 }

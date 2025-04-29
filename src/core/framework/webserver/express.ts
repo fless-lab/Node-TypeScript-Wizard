@@ -12,6 +12,7 @@ import {
 import { helmetCSPConfig } from 'core/constants';
 import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
 import { BullServerAdapter } from 'modules/shared/queue';
+import { SwaggerIntegration } from '../swagger/integration';
 
 const app = express();
 const AllRoutes = AppModule.getRouter();
@@ -51,6 +52,16 @@ app.use('/api/v1', AllRoutes);
 
 // Bull Board UI (avant les error handlers pour éviter les 404)
 app.use('/checker/admin/queues', BullServerAdapter.getRouter());
+
+// Documentation API (avant les error handlers)
+SwaggerIntegration.initialize(app, {
+  apiPath: '/docs',
+  title: 'API Documentation',
+  version: '1.0.0',
+  description: 'Documentation API générée automatiquement',
+  basePath: '/api/v1',
+  autoExtractTypes: true
+});
 
 // Error handlers
 app.use(NotFoundHandler);
