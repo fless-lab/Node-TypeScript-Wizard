@@ -1,8 +1,20 @@
+{{ subject }}
+
+{% if name %}Hello {{ name }},{% endif %}
+
 {{ purpose }}
 
-{{ code }}
+Votre code : {{ code }}
 
-This code will expire in {{ expiresIn }} minutes.
+Ce code expirera dans {{ expiresIn }} minutes.
 
-Best regards,
-The {{ appName }} Team
+{% if purpose === 'Your OTP code for account verification is:' %}
+Si vous n'avez pas créé de compte, veuillez ignorer cet email.
+{% elif purpose === 'Your OTP code for resetting your password is:' %}
+Si vous n'avez pas demandé de réinitialisation de mot de passe, veuillez ignorer cet email ou contacter le support.
+{% elif purpose === 'Your OTP code for two-factor authentication is:' %}
+Si vous n'avez pas tenté de vous connecter, veuillez immédiatement changer votre mot de passe et contacter le support.
+{% endif %}
+
+Cordialement,
+L'équipe {{ appName }}

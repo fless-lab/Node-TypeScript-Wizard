@@ -27,6 +27,14 @@
             text-align: center;
             margin-top: 10px;
         }
+        .purpose {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
         .footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -37,14 +45,30 @@
     </style>
 </head>
 <body>
-    <p>{{ purpose }}</p>
+    <h1>{{ subject }}</h1>
+    
+    {% if name %}
+    <p>Hello {{ name }},</p>
+    {% endif %}
+    
+    <div class="purpose">
+        {{ purpose }}
+    </div>
     
     <div class="code">{{ code }}</div>
     
-    <p class="expiry">This code will expire in {{ expiresIn }} minutes</p>
+    <p class="expiry">Ce code expirera dans {{ expiresIn }} minutes</p>
+    
+    {% if purpose === 'Your OTP code for account verification is:' %}
+    <p>Si vous n'avez pas créé de compte, veuillez ignorer cet email.</p>
+    {% elif purpose === 'Your OTP code for resetting your password is:' %}
+    <p>Si vous n'avez pas demandé de réinitialisation de mot de passe, veuillez ignorer cet email ou contacter le support.</p>
+    {% elif purpose === 'Your OTP code for two-factor authentication is:' %}
+    <p>Si vous n'avez pas tenté de vous connecter, veuillez immédiatement changer votre mot de passe et contacter le support.</p>
+    {% endif %}
     
     <div class="footer">
-        <p>Best regards,<br>The {{ appName }} Team</p>
+        <p>Cordialement,<br>L'équipe {{ appName }}</p>
     </div>
 </body>
 </html>
