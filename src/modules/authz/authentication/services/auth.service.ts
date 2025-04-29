@@ -623,6 +623,39 @@ class AuthService {
       };
     }
   }
+
+  async getCurrentUser(
+    userId: string,
+  ): Promise<SuccessResponseType<IUserModel> | ErrorResponseType> {
+    try {
+      const userResponse = await UserService.findById(userId);
+
+      if (!userResponse.success || !userResponse.data?.docs) {
+        throw new ErrorResponse({
+          code: 'NOT_FOUND_ERROR',
+          message: 'User not found.',
+          statusCode: 404,
+        });
+      }
+
+      return {
+        success: true,
+        data: userResponse.data.docs,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof ErrorResponse
+            ? error
+            : new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: (error as Error).message,
+                statusCode: 500,
+              }),
+      };
+    }
+  }
 }
 
 export default new AuthService();

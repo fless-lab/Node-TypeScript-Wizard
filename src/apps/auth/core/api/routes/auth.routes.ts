@@ -71,4 +71,11 @@ router.post('/otp/generate', AuthController.generateOTP);
  */
 router.post('/otp/validate', AuthController.validateOTP);
 
+/**
+ * Route for getting current user information
+ * GET /auth/me
+ * Requires authentication
+ */
+router.get('/me', authenticate, AuthController.getCurrentUser);
+
 export default router;

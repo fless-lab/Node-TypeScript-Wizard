@@ -289,6 +289,29 @@ class AuthController {
       } as ErrorResponseType);
     }
   }
+
+  /**
+   * Get current user information
+   */
+  static async getCurrentUser(req: Request, res: Response) {
+    try {
+      // @ts-ignore: Suppress TS error for non-existent property
+      const userId = req.payload.aud;
+
+      const response = await AuthService.getCurrentUser(userId);
+
+      if (!response.success) {
+        throw response.error;
+      }
+
+      ApiResponse.success(res, response);
+    } catch (error) {
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
+    }
+  }
 }
 
 export default AuthController;
