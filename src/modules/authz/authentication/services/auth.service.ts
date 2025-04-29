@@ -34,7 +34,6 @@ class AuthService {
       const otpResponse = (await OTPService.generate(
         email,
         CONFIG.otp.purposes.ACCOUNT_VERIFICATION.code,
-        false,
       )) as any;
 
       if (!otpResponse.success) {
