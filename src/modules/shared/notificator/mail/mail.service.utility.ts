@@ -4,7 +4,7 @@ import {
   EmailError,
   EmailErrorCode,
 } from './types';
-import { EmailTemplate } from './templates';
+import { EmailTemplate } from '../../queue/email/types';
 import MailService from './mail.service';
 
 class MailServiceUtilities {
@@ -23,33 +23,34 @@ class MailServiceUtilities {
     }
   }
 
-  static async sendOtp({
-    to,
-    code,
-    purpose,
-  }: {
-    to: string;
-    code: string;
-    purpose: string;
-  }): Promise<IEmailResponse> {
-    const otpPurpose = CONFIG.otp.purposes[purpose];
-    if (!otpPurpose) {
-      throw new EmailError(
-        'Invalid OTP purpose provided',
-        EmailErrorCode.TEMPLATE_NOT_FOUND,
-        false,
-      );
+  static async sendOtp(
+    to: string,
+    code: string,
+    purpose: OTPPurpose,
+    name: string,
+  ): Promise<void> {
+    let template: EmailTemplate;
+
+    switch (purpose) {
+      case OTPPurpose.VERIFY_ACCOUNT:
+        template = EmailTemplate.OTP_VERIFY_ACCOUNT;
+        break;
+      case OTPPurpose.RESET_PASSWORD:
+        template = EmailTemplate.OTP_RESET_PASSWORD;
+        break;
+      case OTPPurpose.LOGIN:
+        template = EmailTemplate.OTP_LOGIN;
+        break;
+      default:
+        throw new Error(`Invalid OTP purpose: ${purpose}`);
     }
 
-    return await this.sendMail({
+    await this.sendMail({
       to,
-      template: EmailTemplate.OTP,
+      template,
       data: {
-        subject: otpPurpose.title,
+        name,
         code,
-        purpose: otpPurpose.message,
-        expiresIn: CONFIG.otp.expiration / 60000,
-        appName: CONFIG.app,
       },
     });
   }
