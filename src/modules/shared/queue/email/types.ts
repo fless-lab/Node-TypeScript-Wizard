@@ -48,7 +48,7 @@ export enum EmailTemplate {
   OTP_LOGIN = 'otp-login',
   OTP_RESET_PASSWORD = 'otp-reset-password',
   OTP_VERIFY_ACCOUNT = 'otp-verify-account',
-  WELCOME = 'welcome',
+  ACCOUNT_VERIFIED = 'account-verified'
 }
 
 export const templateConfigs: Record<EmailTemplate, ITemplateConfig> = {
@@ -82,11 +82,11 @@ export const templateConfigs: Record<EmailTemplate, ITemplateConfig> = {
     requiredData: ['name', 'code'],
     description: 'Email sent with OTP code for account verification',
   },
-  [EmailTemplate.WELCOME]: {
-    path: 'welcome',
-    requiredData: ['name'],
-    description: 'Welcome email sent after account verification',
-  },
+  [EmailTemplate.ACCOUNT_VERIFIED]: {
+    path: 'account-verified',
+    requiredData: ['name', 'appName'],
+    description: 'Email sent when account is successfully verified',
+  }
 };
 
 export enum EmailJobPriority {

@@ -127,15 +127,16 @@ class AuthService {
         throw verifyUserResponse.error;
       }
 
-      // Envoi du mail de bienvenue après vérification
+      // Envoi du mail de confirmation après vérification
       const user = userResponse.data.docs;
       const mailData = {
         name: `${user.firstname} ${user.lastname}`,
         email: user.email,
+        appName: CONFIG.app
       };
       await EmailQueueService.addToQueue({
         to: user.email,
-        template: EmailTemplate.WELCOME,
+        template: EmailTemplate.ACCOUNT_VERIFIED,
         data: mailData,
       });
 
@@ -207,7 +208,7 @@ class AuthService {
 
       const mailResponse = await EmailQueueService.addToQueue({
         to: email,
-        template: EmailTemplate.OTP,
+        template: EmailTemplate.OTP_LOGIN,
         data: mailData,
       });
 
@@ -534,7 +535,7 @@ class AuthService {
 
       const mailResponse = await EmailQueueService.addToQueue({
         to: email,
-        template: EmailTemplate.OTP,
+        template: EmailTemplate.OTP_RESET_PASSWORD,
         data: mailData,
       });
 

@@ -3,6 +3,7 @@ import {
   IEmailResponse,
   EmailError,
   EmailErrorCode,
+  OTPPurpose
 } from './types';
 import { EmailTemplate } from '../../queue/email/types';
 import MailService from './mail.service';
@@ -32,13 +33,13 @@ class MailServiceUtilities {
     let template: EmailTemplate;
 
     switch (purpose) {
-      case OTPPurpose.VERIFY_ACCOUNT:
+      case OTPPurpose.ACCOUNT_VERIFICATION:
         template = EmailTemplate.OTP_VERIFY_ACCOUNT;
         break;
-      case OTPPurpose.RESET_PASSWORD:
+      case OTPPurpose.FORGOT_PASSWORD:
         template = EmailTemplate.OTP_RESET_PASSWORD;
         break;
-      case OTPPurpose.LOGIN:
+      case OTPPurpose.LOGIN_CONFIRMATION:
         template = EmailTemplate.OTP_LOGIN;
         break;
       default:
