@@ -48,7 +48,8 @@ export enum EmailTemplate {
   OTP_LOGIN = 'otp-login',
   OTP_RESET_PASSWORD = 'otp-reset-password',
   OTP_VERIFY_ACCOUNT = 'otp-verify-account',
-  ACCOUNT_VERIFIED = 'account-verified'
+  ACCOUNT_VERIFIED = 'account-verified',
+  PASSWORD_RESET_CONFIRMATION = 'password-reset-confirmation',
 }
 
 export const templateConfigs: Record<EmailTemplate, ITemplateConfig> = {
@@ -86,7 +87,12 @@ export const templateConfigs: Record<EmailTemplate, ITemplateConfig> = {
     path: 'account-verified',
     requiredData: ['name', 'appName'],
     description: 'Email sent when account is successfully verified',
-  }
+  },
+  [EmailTemplate.PASSWORD_RESET_CONFIRMATION]: {
+    path: 'password-reset-confirmation',
+    requiredData: ['name', 'appName'],
+    description: 'Email sent when password is successfully reset',
+  },
 };
 
 export enum EmailJobPriority {

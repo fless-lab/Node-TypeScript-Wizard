@@ -132,7 +132,7 @@ class AuthService {
       const mailData = {
         name: `${user.firstname} ${user.lastname}`,
         email: user.email,
-        appName: CONFIG.app
+        appName: CONFIG.app,
       };
       await EmailQueueService.addToQueue({
         to: user.email,
@@ -619,6 +619,26 @@ class AuthService {
 
       if (!updatePasswordResponse.success) {
         throw updatePasswordResponse.error;
+      }
+
+      // Send confirmation email
+      const mailData = {
+        name: `${user.firstname} ${user.lastname}`,
+        appName: CONFIG.app,
+      };
+
+      const mailResponse = await EmailQueueService.addToQueue({
+        to: email,
+        template: EmailTemplate.PASSWORD_RESET_CONFIRMATION,
+        data: mailData,
+      });
+
+      if (!mailResponse.success) {
+        LOGGER.error(
+          'Failed to queue password reset confirmation email',
+          mailResponse.error,
+        );
+        // We don't throw an error here as the password was successfully reset
       }
 
       return { success: true };
