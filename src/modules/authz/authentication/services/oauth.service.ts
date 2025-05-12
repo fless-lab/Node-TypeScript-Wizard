@@ -5,8 +5,11 @@ import {
 } from '@nodesandbox/response-kit';
 import { AuthenticationStrategies } from '../strategies';
 import { UserService } from 'modules/features/actions';
-import { IOAuthProvider, IUserModel } from 'modules/features/actions/user/types';
-import { getOAuthConfig, OAuthConfig } from 'core/config/oauth.config';
+import {
+  IOAuthProvider,
+  IUserModel,
+} from 'modules/features/actions/user/types';
+import { getOAuthConfig } from 'core/config/oauth.config';
 import { ConfigService } from 'core/config';
 import { Types } from 'mongoose';
 
@@ -15,7 +18,9 @@ export type OAuthProviderType = 'google' | 'facebook' | 'github';
 
 class OAuthService {
   private config = getOAuthConfig(ConfigService.getInstance().getConfig());
-  
+  private allowAutoRegistration =
+    process.env.OAUTH_ALLOW_AUTO_REGISTRATION === 'true';
+
   /**
    * Returns a list of all enabled OAuth providers
    */
@@ -24,7 +29,7 @@ class OAuthService {
       .filter(([_, config]) => config.enabled)
       .map(([provider]) => provider as OAuthProviderType);
   }
-  
+
   /**
    * Get configuration for a specific provider
    */
@@ -56,26 +61,42 @@ class OAuthService {
 
       // Check if user exists
       const userResponse = await UserService.findOne({ email });
-      let user = userResponse.success ? userResponse.data?.docs as IUserModel : null;
+      let user = userResponse.success
+        ? (userResponse.data?.docs as IUserModel)
+        : null;
 
       if (!user) {
+        // Check if auto-registration is allowed
+        if (!this.allowAutoRegistration) {
+          throw new ErrorResponse({
+            code: 'ACCOUNT_NOT_FOUND',
+            message: `No account found with email ${email}. Auto-registration is disabled.`,
+            statusCode: 404,
+          });
+        }
+
         // Create new user
-        const [firstname, ...lastnameParts] = (profile.displayName || '').split(' ');
+        const [firstname, ...lastnameParts] = (profile.displayName || '').split(
+          ' ',
+        );
         const lastname = lastnameParts.join(' ') || 'User';
 
+        LOGGER.info(`Creating new user via OAuth: ${email}`);
         const createUserResponse = await UserService.create({
           email,
           firstname,
           lastname,
           verified: true, // OAuth users are pre-verified
           active: true,
-          oauthProviders: [{
-            providerId: profile.id,
-            provider,
-            email,
-            name: profile.displayName,
-            picture: profile.photos?.[0]?.value,
-          }],
+          oauthProviders: [
+            {
+              providerId: profile.id,
+              provider,
+              email,
+              name: profile.displayName,
+              picture: profile.photos?.[0]?.value,
+            },
+          ],
         });
 
         if (!createUserResponse.success) {
@@ -86,7 +107,8 @@ class OAuthService {
       } else {
         // Check if provider is already linked
         const existingProvider = user.oauthProviders?.find(
-          (p: IOAuthProvider) => p.provider === provider && p.providerId === profile.id,
+          (p: IOAuthProvider) =>
+            p.provider === provider && p.providerId === profile.id,
         );
 
         if (!existingProvider) {
@@ -100,9 +122,12 @@ class OAuthService {
           };
 
           const userId = user._id as Types.ObjectId;
-          const updateResponse = await UserService.updateById(userId.toString(), {
-            $push: { oauthProviders: newProvider },
-          });
+          const updateResponse = await UserService.updateById(
+            userId.toString(),
+            {
+              $push: { oauthProviders: newProvider },
+            },
+          );
 
           if (!updateResponse.success) {
             throw updateResponse.error;
@@ -156,4 +181,4 @@ class OAuthService {
   }
 }
 
-export const oauthService = new OAuthService(); 
+export const oauthService = new OAuthService();
