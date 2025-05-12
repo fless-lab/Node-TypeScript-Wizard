@@ -4,7 +4,7 @@ import oauthRoutes from './oauth.routes';
 
 const router = Router();
 
-router.use('/auth', authRoutes);
-router.use('/auth/oauth', oauthRoutes);
+router.use('/', authRoutes);
+router.use('/oauth', oauthRoutes);
 
 export default router;
