@@ -12,6 +12,7 @@ import {
 import { helmetCSPConfig } from 'core/constants';
 import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
 import { BullServerAdapter } from 'modules/shared/queue';
+import { passport } from 'core/config/passport.config';
 
 const app = express();
 const AllRoutes = AppModule.getRouter();
@@ -46,8 +47,11 @@ initializeViewEngine;
 // Client authentication middleware
 app.use(SharedMiddlewares.enableRateLimiter);
 
+// Initialize Passport
+app.use(passport.initialize());
+
 // API Routes
-app.use('/api/v1', AllRoutes);
+app.use(CONFIG.api.prefix, AllRoutes);
 
 // Bull Board UI (avant les error handlers pour éviter les 404)
 app.use('/checker/admin/queues', BullServerAdapter.getRouter());
