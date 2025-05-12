@@ -14,31 +14,27 @@ export interface OAuthConfig {
   github: OAuthProviderConfig;
 }
 
-export const getOAuthConfig = (config: Config): OAuthConfig => {
+export const getOAuthConfig = (config: Config = CONFIG): OAuthConfig => {
   // Base URL from environment or default to localhost
   const baseUrl = process.env.APP_URL || `http://localhost:${config.port}`;
 
-  // API prefix from environment or default to /api/v1
-  const apiPrefix = process.env.API_PREFIX || '/api/v1';
-
-  // Auth route prefix from environment or default to /auth
-  const authPrefix = process.env.AUTH_PREFIX || '/auth';
-
-  // OAuth route prefix from environment or default to /oauth
-  const oauthPrefix = process.env.OAUTH_PREFIX || '/oauth';
+  // Get API prefixes from config
+  const apiPrefix = config.api.prefix;
+  const authPrefix = config.api.auth.prefix;
+  const oauthPrefix = config.api.auth.oauth.prefix;
 
   // Build the base path for OAuth routes
   const oauthBasePath = `${apiPrefix}${authPrefix}${oauthPrefix}`;
 
-  // Allow overriding callback URLs per provider
+  // Get callback URLs from config or build default ones
   const googleCallbackURL =
-    process.env.OAUTH_GOOGLE_CALLBACK_URL ||
+    config.api.auth.oauth.callbackUrls.google ||
     `${baseUrl}${oauthBasePath}/google/callback`;
   const facebookCallbackURL =
-    process.env.OAUTH_FACEBOOK_CALLBACK_URL ||
+    config.api.auth.oauth.callbackUrls.facebook ||
     `${baseUrl}${oauthBasePath}/facebook/callback`;
   const githubCallbackURL =
-    process.env.OAUTH_GITHUB_CALLBACK_URL ||
+    config.api.auth.oauth.callbackUrls.github ||
     `${baseUrl}${oauthBasePath}/github/callback`;
 
   return {

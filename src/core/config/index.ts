@@ -7,6 +7,20 @@ export interface Config {
   runningProd: boolean;
   app: string;
   port: number;
+  api: {
+    prefix: string;
+    auth: {
+      prefix: string;
+      oauth: {
+        prefix: string;
+        callbackUrls: {
+          google: string;
+          facebook: string;
+          github: string;
+        };
+      };
+    };
+  };
   clientAuth: {
     enableClientAuth: boolean;
     basicAuthUser: string;
@@ -161,6 +175,20 @@ export class ConfigService {
       runningProd: process.env.NODE_ENV === 'production',
       app: process.env.APP_NAME || 'myapp',
       port: parseInt(process.env.PORT || '5095', 10),
+      api: {
+        prefix: process.env.API_PREFIX || '/api/v1',
+        auth: {
+          prefix: process.env.AUTH_PREFIX || '/auth',
+          oauth: {
+            prefix: process.env.OAUTH_PREFIX || '/oauth',
+            callbackUrls: {
+              google: process.env.OAUTH_GOOGLE_CALLBACK_URL || '',
+              facebook: process.env.OAUTH_FACEBOOK_CALLBACK_URL || '',
+              github: process.env.OAUTH_GITHUB_CALLBACK_URL || '',
+            },
+          },
+        },
+      },
       clientAuth: {
         enableClientAuth: process.env.ENABLE_CLIENT_AUTH === 'true',
         basicAuthUser: process.env.BASIC_AUTH_USER || 'admin',

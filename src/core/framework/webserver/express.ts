@@ -47,7 +47,7 @@ initializeViewEngine;
 app.use(SharedMiddlewares.enableRateLimiter);
 
 // API Routes
-app.use('/api/v1', AllRoutes);
+app.use(CONFIG.api.prefix, AllRoutes);
 
 // Bull Board UI (avant les error handlers pour éviter les 404)
 app.use('/checker/admin/queues', BullServerAdapter.getRouter());
