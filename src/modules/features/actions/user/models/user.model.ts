@@ -25,7 +25,9 @@ const userSchema = createBaseSchema<IUserModel>(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.oauthProviders || this.oauthProviders.length === 0;
+      },
     },
     active: {
       type: Boolean,
@@ -35,6 +37,25 @@ const userSchema = createBaseSchema<IUserModel>(
       type: Boolean,
       default: false,
     },
+    oauthProviders: [
+      {
+        providerId: {
+          type: String,
+          required: true,
+        },
+        provider: {
+          type: String,
+          enum: ['google', 'facebook', 'github'],
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+        },
+        name: String,
+        picture: String,
+      },
+    ],
   },
   {
     modelName: USER_MODEL_NAME,
@@ -44,7 +65,9 @@ const userSchema = createBaseSchema<IUserModel>(
 userSchema.pre('save', async function (next) {
   try {
     if (this.isNew || this.isModified('password')) {
-      this.password = await PasswordUtils.hashPassword(this.password);
+      if (this.password) {
+        this.password = await PasswordUtils.hashPassword(this.password);
+      }
     }
     next();
   } catch (error) {
